@@ -1,5 +1,6 @@
 from random import choice
 import sys
+import string
 
 def open_and_read_file(file_path):
     """Takes file path as string; returns text as string.
@@ -16,7 +17,7 @@ def open_and_read_file(file_path):
     return text
 
 
-def make_chains(text_string):
+def make_chains(text_string, n=3):
     """Takes input text as string; returns _dictionary_ of markov chains.
 
     A chain will be a key that consists of a tuple of (word1, word2)
@@ -32,14 +33,12 @@ def make_chains(text_string):
 
     words = text_string.split() # Split text into list of words
     i = 0
-    for i in range(len(words)-2): # Loop through all words, stopping at second to last
-        # Each key is a tuple of the word at index i, and the word directly following
-        # chains.get returns the value of that tuple; 
-        # it creates an empty list of nothing is there already
-        chains[words[i], words[i+1]] = chains.get((words[i], words[i+1]), [])
-        # If there is already a list there, 
-        # it will append the word following the word at index 1 in the tuple
-        chains[words[i], words[i+1]].append(words[i+2])
+    for i in range(len(words)-(n)):
+
+        word_key = tuple(words[i:i+n])
+        chains[word_key] = chains.get((word_key), [])
+
+        chains[word_key].append(words[i+n])
 
     return chains
 
@@ -49,30 +48,41 @@ def make_text(chains):
 
     text = "" # Creates empty string
 
-    # Find a random key(a tuple) from the chains dictionary, and store it in first_two_words
-    first_two_words = choice(chains.keys()) 
-    # chains.get gives you a list of values for the first_two_words, 
-    # and choice picks a random one, which we store in next_word
-    next_word = choice(chains.get(first_two_words))
-    # Concatenate both words in the first_two_words, and the next_word to the text string
-    
-    first_word = first_two_words[0]
-    second_word = first_two_words[1]
-
-    text = first_word + " " + second_word + " " + next_word
-
+    # Find a random key(a tuple) from the chains dictionary, and store it in first_n_words
     while True:
-        next_two_words = (second_word, next_word)
+        first_n_words = choice(chains.keys()) 
 
-        if chains.get(next_two_words) == None:
+        if first_n_words[0][0].isupper():
             break
         else:
-            next_next_word = choice(chains.get(next_two_words))
-            text = text + " " + next_next_word
+            continue
+    # chains.get gives you a list of values for the first_n_words, 
+    # and choice picks a random one, which we store in next_word
+    next_word = choice(chains.get(first_n_words))
+    # Concatenate both words in the first_n_words, and the next_word to the text string
+    
+    for item in first_n_words:
+        text = text + " " + item
 
-            second_word = next_word
-            next_word = next_next_word
+    text = text + " " + next_word
 
+    while True:
+        next_n_words = first_n_words[1:] + (next_word,)
+
+        if chains.get(next_n_words) == None:
+            break
+
+            # CODE TO DO PUNCTUATION HERE
+            if chains.get(next_n_words)[0][len(next_n_words)-1] in string.punctuation:
+                break
+            else: 
+                continue
+                
+        else:
+            first_n_words = next_n_words
+            next_word = choice(chains.get(next_n_words))
+
+            text = text + " " + next_word
 
     return text
 
