@@ -1,4 +1,5 @@
 from random import choice
+import sys
 
 def open_and_read_file(file_path):
     """Takes file path as string; returns text as string.
@@ -40,7 +41,6 @@ def make_chains(text_string):
         # it will append the word following the word at index 1 in the tuple
         chains[words[i], words[i+1]].append(words[i+2])
 
-    print chains
     return chains
 
 
@@ -49,46 +49,35 @@ def make_text(chains):
 
     text = "" # Creates empty string
 
-    # Find a random key(a tuple) from the chains dictionary, and store it in first_key
-    first_key = choice(chains.keys()) 
-    # chains.get gives you a list of values for the first_key, 
-    # and choice picks a random one, which we store in first_value
-    first_value = choice(chains.get(first_key))
-    # Concatenate both words in the first_key, and the first_value to the text string
-    text = first_key[0] +  " " +  first_key[1] + " " + first_value
+    # Find a random key(a tuple) from the chains dictionary, and store it in first_two_words
+    first_two_words = choice(chains.keys()) 
+    # chains.get gives you a list of values for the first_two_words, 
+    # and choice picks a random one, which we store in next_word
+    next_word = choice(chains.get(first_two_words))
+    # Concatenate both words in the first_two_words, and the next_word to the text string
     
-    # Loop until a condition breaks it
-    #new_key = (first_key[1], first_value)
+    first_word = first_two_words[0]
+    second_word = first_two_words[1]
+
+    text = first_word + " " + second_word + " " + next_word
 
     while True:
-        new_key = (first_key[1], first_value)
-        print new_key
-        print chains.get(new_key)
+        next_two_words = (second_word, next_word)
 
-        if chains.get(new_key) == None:
+        if chains.get(next_two_words) == None:
             break
         else:
-            new_value = choice(chains.get(new_key))
-            text = text + " " + new_value
-            
-            first_key = (first_value, new_value)
+            next_next_word = choice(chains.get(next_two_words))
+            text = text + " " + next_next_word
 
-        # tokens = text.rstrip().split()
-        # text_key = (tokens[-2], tokens[-1])
-
-        # text_value = choice(chains.get(text_key))
-        # text = text + " " + text_value
-
-        # if chains.get(text_key) == []:
-        #     break 
-
-        #break
+            second_word = next_word
+            next_word = next_next_word
 
 
     return text
 
 
-input_path = "green-eggs.txt"
+input_path = sys.argv[1]
 
 # Open the file and turn it into one long string
 input_text = open_and_read_file(input_path)
